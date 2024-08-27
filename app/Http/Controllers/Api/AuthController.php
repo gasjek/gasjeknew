@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\PenggunaResource;
 use App\Models\User;
 use App\Models\UserVerify;
+use App\Models\Voucher;
+use App\Models\VoucherUsage;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -112,12 +114,22 @@ class AuthController extends Controller
 
         // Cek apakah pengguna ada berdasarkan email
         $pengguna = User::where('email', $request->email_pengguna)->where('role', 'pengguna')->first();
-        if (!$pengguna || !Hash::check($request->password_pengguna, $pengguna->password)) {
-            // Jika pengguna tidak ditemukan atau password salah
+
+        if (!$pengguna) {
+            // Jika pengguna tidak ditemukan
             return response()->json([
-                'status' => 401,
+                'status' => 3,
                 'message' =>  'Email atau password salah',
-            ], 401);
+            ]);
+        }
+
+        // Cek apakah password salah
+        if (!Hash::check($request->password_pengguna, $pengguna->password)) {
+            // Jika password salah
+            return response()->json([
+                'status' => 4,
+                'message' =>  'Password Anda Salah',
+            ]);
         }
 
         // Cek apakah pengguna sudah diverifikasi
@@ -134,7 +146,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 401,
                 'message' => 'Akun anda belum terverifikasi. Kode OTP telah dikirimkan.',
-            ], 401);
+            ]);
         }
 
         // Jika pengguna sudah diverifikasi, perbarui fcm_token jika disediakan
@@ -146,7 +158,7 @@ class AuthController extends Controller
         $token = $pengguna->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'status' => 200,
+            'status' => 1,
             'token' => $token,
             'message' => 'Login berhasil',
             'user_verify' => $pengguna->is_verify,
@@ -161,33 +173,27 @@ class AuthController extends Controller
             'new_password' => 'required|min:8|confirmed',
         ]);
 
-        $user = $request->user();
+        $pengguna = $request->user();
 
         // Periksa apakah kata sandi saat ini benar
-        if (!Hash::check($request->old_password, $user->password)) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Kata sandi saat ini salah',
-            ], 400);
+        if (!Hash::check($request->old_password, $pengguna->password)) {
+            return new PenggunaResource(400, 'Kata sandi saat ini salah');
         }
 
         // Update kata sandi baru
-        $user->password = Hash::make($request->new_password);
-        $user->save();
+        $pengguna->password = Hash::make($request->new_password);
+        $pengguna->save();
 
-        return response()->json([
-            'status' => 200,
-            'message' => 'Kata sandi berhasil diperbarui',
-        ], 200);
+        return new PenggunaResource(200, 'Kata sandi berhasil diperbarui');
     }
 
     // Update informasi pengguna
     public function updateUser(Request $request)
     {
         $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $request->user()->id,
-            'no_whatsapp' => 'sometimes|string|max:15',
+            'nama_pengguna' => 'sometimes|string|max:255',
+            'email_pengguna' => 'sometimes|string|email|max:255|unique:users,email,' . $request->user()->id,
+            'nomor_pengguna' => 'sometimes|string|max:15',
             'photo_profile' => 'required'
         ]);
 
@@ -195,6 +201,272 @@ class AuthController extends Controller
         $user->update($request->only('name', 'email', 'no_whatsapp', 'photo_profile'));
 
         return new PenggunaResource(200, 'Informasi pengguna berhasil diperbarui');
+    }
+
+    public function verify(Request $request)
+    {
+        $validatedData = $request->validate([
+            'user_email' => 'required|email',
+            'token' => 'required',
+        ]);
+
+        $email = $validatedData['user_email'];
+        $token = $validatedData['token'];
+
+        // Cari pengguna berdasarkan email
+        $pengguna = User::where('email', $email)->first();
+
+        if (!$pengguna) {
+            return new PenggunaResource(404, 'Akun tidak ditemukan');
+        }
+
+        // Cari verifikasi pengguna berdasarkan email dan token
+        $penggunaVerify = UserVerify::where('email', $email)
+            ->where('otp', $token)
+            ->first();
+
+        if (!$penggunaVerify) {
+            return new PenggunaResource(401, 'Kode OTP tidak valid');
+        }
+
+        // Hapus data verifikasi setelah digunakan
+        $penggunaVerify->delete();
+
+        // Update status verifikasi pengguna
+        $pengguna->update(['is_verify' => 1]);
+
+        // Kirimkan notifikasi ke pengguna
+        GlobalHelper::sendWhatsApp($pengguna->no_whatsapp, 'Selamat akun anda telah active. Sekarang anda bisa melanjutkan transaksi');
+
+        return new PenggunaResource(200, 'Akun Anda telah diverifikasi');
+    }
+
+    public function otpRequest(Request $request)
+    {
+        $validatedData = $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $email = $validatedData['email'];
+
+        // Cari pengguna berdasarkan email
+        $pengguna = User::where('email', $email)->firstOrFail();
+
+        // Generate OTP baru
+        $otp_code = rand(100000, 999999);
+
+        // JIka ada update OTP sebelumnya
+        UserVerify::updateOrCreate(
+            ['email' => $pengguna->email],
+            ['otp' => $otp_code]
+        );
+
+        // Kirim OTP ke nomor WhatsApp pengguna
+        GlobalHelper::sendOTP($otp_code, 'verify', $pengguna->no_whatsapp);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'OTP terkirim',
+        ], 200);
+    }
+
+    public function updateFCMToken(Request $request)
+    {
+        $validatedData = $request->validate([
+            'token' => 'required|integer',
+            'fcm_token' => 'required',
+        ]);
+
+        $idPengguna = $validatedData['token'];
+
+        // Cari pengguna berdasarkan ID, jika tidak ditemukan, akan otomatis return 404
+        $pengguna = User::findOrFail($idPengguna);
+
+        // Update FCM token pengguna
+        $pengguna->update([
+            'fcm_token' => $validatedData['fcm_token']
+        ]);
+
+        return new PenggunaResource(200, 'Token FCM berhasil diperbarui');
+    }
+
+    public function updateSaldo(Request $request)
+    {
+        // Validasi input
+        $validatedData = $request->validate([
+            'token' => 'required|integer',
+            'balance' => 'required|numeric',
+        ]);
+
+        $token = $validatedData['token'];
+        $balance = $validatedData['balance'];
+
+        // Update saldo pengguna
+        $pengguna = User::where('id', $token)->first();
+
+        // Cek apakah pengguna ditemukan
+        if ($pengguna) {
+            $pengguna->update(['saldo' => $balance]);
+
+            return new PenggunaResource(200, 'Saldo pengguna berhasil diperbarui.');
+        } else {
+            return new PenggunaResource(404, 'Pengguna tidak ditemukan');
+        }
+    }
+
+    public function checkSaldo(Request $request)
+    {
+        // Validasi input
+        $validatedData = $request->validate([
+            'token' => 'required|integer',
+            'harga' => 'required|numeric',
+        ]);
+
+        $token = $validatedData['token'];
+        $harga = $validatedData['harga'];
+
+        // Cari pengguna berdasarkan token (ID)
+        $user = User::where('id', $token)->first();
+
+        if ($user) {
+            if ($user->saldo >= $harga) {
+                return new PenggunaResource(200, 'Saldo mencukupi.');
+            } else {
+                return new PenggunaResource(404, 'Saldo tidak mencukupi.');
+            }
+        } else {
+            return new PenggunaResource(404, 'Pengguna tidak ditemukan');
+        }
+    }
+
+    public function lupaPassword(Request $request)
+    {
+        // Validasi input nomor pengguna
+        $validatedData = $request->validate([
+            'user_number' => 'required|string',
+        ]);
+
+        $nohp = $validatedData['user_number'];
+
+        // Cari pengguna berdasarkan nomor HP
+        $user = User::where('no_whatsapp', $nohp)->first();
+
+        if (!$user) {
+            return new PenggunaResource(404, 'Pengguna tidak ditemukan');
+        } else {
+            // Generate kode OTP
+            $codeOTP = rand(100000, 999999);
+
+            // Simpan OTP ke dalam tabel verifikasi
+            UserVerify::create([
+                'email' => $user->email,
+                'token' => $codeOTP,
+            ]);
+
+            // Kirim OTP ke nomor HP pengguna
+            GlobalHelper::sendOTP($codeOTP, 'forgot', $user->no_whatsapp);
+
+            return new PenggunaResource(200, 'OTP terkirim');
+        }
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'user_number' => 'required',
+            'otp' => 'required',
+            'new_password' => 'required|min:6',
+        ]);
+
+        $nohp = $request->user_number;
+        $otp = $request->otp;
+        $new_password = $request->new_password;
+
+        $user = User::where('no_whatsapp', $nohp)->first();
+
+        if (!$user) {
+            return new PenggunaResource(404, 'Pengguna tidak ditemukan');
+        }
+
+        $verification = UserVerify::where('email', $user->email)
+            ->where('otp', $otp)
+            ->first();
+
+        if (!$verification) {
+            return new PenggunaResource(404, 'OTP tidak ditemukan');
+        }
+
+        // Update password user
+        $user->password = bcrypt($new_password);
+        $user->save();
+
+        // Hapus verifikasi token
+        $verification->delete();
+
+        return new PenggunaResource(200, 'Password berhasil diperbarui');
+    }
+
+    public function checkVoucher(Request $request)
+    {
+        $validatedData = $request->validate([
+            'voucher_code' => 'required|string',
+            'token' => 'required|integer',
+        ]);
+
+        $voucherCode = $validatedData['voucher_code'];
+        $userId = $validatedData['token'];
+        $currentDate = now()->format('Y-m-d');
+
+        try {
+            // Cari voucher berdasarkan kode
+            $voucher = Voucher::where('voucher_code', $voucherCode)
+                ->where('is_active', 1)
+                ->first();
+
+            if (!$voucher) {
+                return new PenggunaResource(404, 'Voucher tidak ditemukan');
+            }
+
+            // Cek apakah jatah penggunaan masih tersedia
+            if ($voucher->used >= $voucher->quota) {
+                return new PenggunaResource(400, 'Jatah penggunaan sudah habis');
+            }
+
+            // Cek apakah voucher sudah kedaluwarsa
+            if ($voucher->expiry_date < $currentDate) {
+                return new PenggunaResource(400, 'Voucher sudah kedaluwarsa');
+            }
+
+            // Cek apakah user sudah pernah menggunakan voucher ini
+            $voucherUsage = VoucherUsage::where('user_id', $userId)
+                ->where('voucher_id', $voucher->id)
+                ->first();
+
+            if ($voucherUsage) {
+                return new PenggunaResource(400, 'Anda sudah menggunakan voucher ini');
+            }
+
+            // Kurangi jatah penggunaan voucher
+            $voucher->decrement($voucher->id);
+
+            // Update saldo pengguna
+            User::where('id', $userId)->increment('saldo', $voucher->discount);
+
+            // Catat penggunaan voucher oleh user
+            VoucherUsage::create([
+                'user_id' => $userId,
+                'voucher_id' => $voucher->id,
+            ]);
+
+            // Jika valid, balas dengan detail voucher
+            return response()->json([
+                'status' => 200,
+                'message' => 'Voucher valid.',
+                'voucher' => $voucher,
+            ], 200);
+        } catch (\Exception $e) {
+            return new PenggunaResource(500, $e->getMessage());
+        }
     }
 
     public function logout(Request $request)
