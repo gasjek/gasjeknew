@@ -14,7 +14,7 @@ return [
     */
 
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'api'),
+        'guard' => env('AUTH_GUARD', 'api_users'),
         'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
     ],
 
@@ -41,9 +41,16 @@ return [
             'provider' => 'users',
         ],
 
-        'api' => [
+        // Guard untuk pengguna (user & mitra)
+        'api_users' => [
             'driver' => 'sanctum',
             'provider' => 'users',
+        ],
+
+        // Guard untuk driver
+        'api_drivers' => [
+            'driver' => 'sanctum',
+            'provider' => 'drivers',
         ],
     ],
 
@@ -67,7 +74,12 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+            'model' => App\Models\User::class,
+        ],
+
+        'drivers' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Driver::class,
         ],
 
         // 'users' => [

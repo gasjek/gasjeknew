@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body {
+    @apply font-secondary text-white;
+}
+
+p {
+    @apply text-[18px] lg:text-[22px];
+}
+
+.footer-item {
+    @apply transition-all duration-300 hover:underline;
+}
+
+.menu-item {
+    @apply lg:text-[18px] text-[14px] hover:text-secondary transition-all duration-300 hover:underline;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    @apply font-primary mb-3;
+}
+
+h1 {
+    @apply text-[30px] lg:text-[60px] leading-none;
+}
+
+h2 {
+    @apply text-[50px] leading-tight;
+}
+
+h3 {
+    @apply text-[25px];
+}
+
+.btn {
+    @apply h-[50px] px-[25px] transition-all duration-300 text-white rounded-[50px] flex items-center gap-2 mt-3;
+}
+
+/* .btn-primary {
+  @apply bg-primary hover:bg-primary-hover;
+}
+.btn-secondary {
+  @apply bg-secondary hover:bg-secondary-hover;
+} */
+
+.nav-is-open {
+    @apply h-max p-6;
+}
+
+ul li > a,
+p > a {
+    @apply text-primary lg:text-[22px] px-['20px'];
+}
+
+.hero {
+    @apply bg-hero;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url("../../public/storage/img/bg.jpg");
+}
+
+.c-footer__title {
+    font-size: 22px;
+    line-height: 27px;
+}
+.privacy-policy {
+    @apply text-black;
+}
+.heading-nav {
+    @apply text-[22px] py-9;
+}
+.heading-nav,
+li,
+p > a {
+    @apply text-[22px];
+}
+.logo_gasjek_putih {
+    @apply w-[112px];
+}

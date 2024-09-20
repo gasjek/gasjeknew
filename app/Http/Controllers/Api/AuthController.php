@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\GlobalHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PenggunaResource;
+use App\Models\Setting;
 use App\Models\User;
 use App\Models\UserVerify;
 use App\Models\Voucher;
 use App\Models\VoucherUsage;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -107,13 +109,14 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         // Validasi input
-        $request->validate([
+        $validateData = $request->validate([
             'email_pengguna' => 'required|email|string',
+            // 'role' => 'required',
             'password_pengguna' => 'required',
         ]);
 
         // Cek apakah pengguna ada berdasarkan email
-        $pengguna = User::where('email', $request->email_pengguna)->where('role', 'pengguna')->first();
+        $pengguna = User::where('email', $validateData['email_pengguna'])->where('role', 'pengguna')->first();
 
         if (!$pengguna) {
             // Jika pengguna tidak ditemukan
@@ -154,7 +157,7 @@ class AuthController extends Controller
             $pengguna->update(['fcm_token' => $request->fcm_token]);
         }
 
-        // Buat token dan respon berhasil
+        // Buat token menggunakan Sanctum
         $token = $pengguna->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -466,6 +469,23 @@ class AuthController extends Controller
             ], 200);
         } catch (\Exception $e) {
             return new PenggunaResource(500, $e->getMessage());
+        }
+    }
+
+    public function operatingHours()
+    {
+        $settings = Setting::whereIn('key', ['closer_hours', 'open_hours'])->get()->keyBy('key');
+        $now = now();
+        $closeTime = Carbon::parse($settings->get('closer_hours'));
+        $openTime = Carbon::parse($settings->get('open_hours'));
+
+        // Jika status_develop adalah true, berikan respons dengan status 202
+        if ($settings->get('status_dev') == 'true') {
+            return new PenggunaResource(202, 'Aplikasi sedang dalam pengembangan.');
+        }
+
+        if ($closeTime->isToday() && $now->gt($closeTime) && $now->lt($openTime->subDay())) {
+            return new PenggunaResource(200, 'Udah tutup nih dari jam 22:00. Kembali buka 05:00.');
         }
     }
 
