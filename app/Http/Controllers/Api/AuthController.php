@@ -23,7 +23,7 @@ class AuthController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $id = $request->input('token');
+        $id = $request->input('id_user');
 
         try {
             $model = $id ? User::getUser($id) : User::getUser();
@@ -54,10 +54,7 @@ class AuthController extends Controller
         // Cek jika email sudah terdaftar
         $existingUserByEmail = User::where('email', $validatedData['email_pengguna'])->first();
         if ($existingUserByEmail) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Email sudah digunakan pengguna lain.'
-            ], 400);
+            return new PenggunaResource(404, 'Email sudah digunakan pengguna lain.');
         }
 
         // Cek jika nomor WhatsApp sudah terdaftar
@@ -68,10 +65,7 @@ class AuthController extends Controller
             } else {
                 $message = 'Nomor HP telah ada silahkan Login';
             }
-            return response()->json([
-                'status' => 401,
-                'message' => $message,
-            ], 401);
+            return new PenggunaResource(401, $message);
         }
 
         $pengguna = User::create([
@@ -98,15 +92,15 @@ class AuthController extends Controller
         $token = $pengguna->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'status' => 200,
-            'token' => $pengguna->id,
+            'status' => 201,
+            'id_user' => $pengguna->id,
             'tokens' => $token,
             'message' => 'Data berhasil dibuat.',
             'is_verify' => 0
         ], 201);
     }
 
-    public function login(Request $request): JsonResponse
+    public function login(Request $request)
     {
         // Validasi input
         $validateData = $request->validate([
@@ -120,19 +114,13 @@ class AuthController extends Controller
 
         if (!$pengguna) {
             // Jika pengguna tidak ditemukan
-            return response()->json([
-                'status' => 3,
-                'message' =>  'Email atau password salah',
-            ]);
+            return new PenggunaResource(404, 'Email atau password salah');
         }
 
         // Cek apakah password salah
         if (!Hash::check($request->password_pengguna, $pengguna->password)) {
             // Jika password salah
-            return response()->json([
-                'status' => 4,
-                'message' =>  'Password Anda Salah',
-            ]);
+            return new PenggunaResource(400, 'Password Anda Salah');
         }
 
         // Cek apakah pengguna sudah diverifikasi
@@ -161,8 +149,8 @@ class AuthController extends Controller
         $token = $pengguna->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'status' => 1,
-            'token' => $token,
+            'status' => 200,
+            'id_user' => $token,
             'message' => 'Login berhasil',
             'user_verify' => $pengguna->is_verify,
         ]);
@@ -210,11 +198,11 @@ class AuthController extends Controller
     {
         $validatedData = $request->validate([
             'user_email' => 'required|email',
-            'token' => 'required',
+            'id_user' => 'required',
         ]);
 
         $email = $validatedData['user_email'];
-        $token = $validatedData['token'];
+        $token = $validatedData['id_user'];
 
         // Cari pengguna berdasarkan email
         $pengguna = User::where('email', $email)->first();
@@ -276,11 +264,11 @@ class AuthController extends Controller
     public function updateFCMToken(Request $request)
     {
         $validatedData = $request->validate([
-            'token' => 'required|integer',
+            'id_user' => 'required|integer',
             'fcm_token' => 'required',
         ]);
 
-        $idPengguna = $validatedData['token'];
+        $idPengguna = $validatedData['id_user'];
 
         // Cari pengguna berdasarkan ID, jika tidak ditemukan, akan otomatis return 404
         $pengguna = User::findOrFail($idPengguna);
@@ -297,11 +285,11 @@ class AuthController extends Controller
     {
         // Validasi input
         $validatedData = $request->validate([
-            'token' => 'required|integer',
+            'id_user' => 'required|integer',
             'balance' => 'required|numeric',
         ]);
 
-        $token = $validatedData['token'];
+        $token = $validatedData['id_user'];
         $balance = $validatedData['balance'];
 
         // Update saldo pengguna
@@ -321,11 +309,11 @@ class AuthController extends Controller
     {
         // Validasi input
         $validatedData = $request->validate([
-            'token' => 'required|integer',
+            'id_user' => 'required|integer',
             'harga' => 'required|numeric',
         ]);
 
-        $token = $validatedData['token'];
+        $token = $validatedData['id_user'];
         $harga = $validatedData['harga'];
 
         // Cari pengguna berdasarkan token (ID)
@@ -363,7 +351,7 @@ class AuthController extends Controller
             // Simpan OTP ke dalam tabel verifikasi
             UserVerify::create([
                 'email' => $user->email,
-                'token' => $codeOTP,
+                'id_user' => $codeOTP,
             ]);
 
             // Kirim OTP ke nomor HP pengguna
@@ -413,11 +401,11 @@ class AuthController extends Controller
     {
         $validatedData = $request->validate([
             'voucher_code' => 'required|string',
-            'token' => 'required|integer',
+            'id_user' => 'required|integer',
         ]);
 
         $voucherCode = $validatedData['voucher_code'];
-        $userId = $validatedData['token'];
+        $userId = $validatedData['id_user'];
         $currentDate = now()->format('Y-m-d');
 
         try {
