@@ -1,3 +1,27 @@
+@push('custom-css')
+    <style>
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+@endpush
 @extends('layouts.main')
 @section('content')
     <main class="min-h-screen">
@@ -120,8 +144,10 @@
                             with the <a href="#" class="text-blue-600 hover:underline dark:text-blue-500">terms and
                                 conditions</a>. *</label>
                     </div>
-                    <button type="submit"
-                        class="text-white bg-primary hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+                    <button type="submit" id="submitBtnDriver"
+                        class="text-white bg-primary hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        Submit
+                    </button>
                 </form>
             </div>
         </div>
