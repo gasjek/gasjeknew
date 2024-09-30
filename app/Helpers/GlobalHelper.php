@@ -9,7 +9,7 @@ class GlobalHelper
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'http://34.50.89.160:3001/api/v1/messages',
+            CURLOPT_URL => 'http://34.101.231.17:3001/api/v1/messages',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -26,7 +26,7 @@ class GlobalHelper
                 ]
             ]),
             CURLOPT_HTTPHEADER => array(
-                'Authorization: ukOnFtHEplRfiT7O.FstbrTQ0dNzhsIHaDrgfs3Q4qSQ7rVyw'
+                'Authorization: ' . env('TOKEN_WAGW'),
             ),
         ));
 
@@ -41,7 +41,7 @@ class GlobalHelper
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'http://34.50.89.160:3001/api/v1/messages',
+            CURLOPT_URL => 'http://34.101.231.17:3001/api/v1/messages',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -58,7 +58,7 @@ class GlobalHelper
                 ]
             ]),
             CURLOPT_HTTPHEADER => array(
-                'Authorization: ukOnFtHEplRfiT7O.FstbrTQ0dNzhsIHaDrgfs3Q4qSQ7rVyw'
+                'Authorization: ' . env('TOKEN_WAGW'),
             ),
         ));
 

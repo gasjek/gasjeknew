@@ -9,7 +9,6 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>GASJek Transportasi & Makanan</title>
-    <link href="css/finish.min.css" rel="stylesheet" />
 
     <!-- favico -->
     <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/apple-touch-icon.png">
@@ -89,7 +88,6 @@
     </footer>
 
     <!-- JavaScript dependencies -->
-    <script src="{{ asset('js/scrollreveal.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="{{ asset('js/main-23742.js') }}"></script>
     @stack('custom-js')

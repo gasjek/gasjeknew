@@ -23,7 +23,7 @@ class DriverController extends Controller
     public function index(Request $request)
     {
         // Mengambil parameter dari request
-        $token = $request->query('token');
+        $token = $request->query('id_driver');
         $platNumber = $request->query('police_number');
         $emailDriver = $request->query('email_driver');
         $is_active = $request->query('is_status');
@@ -55,7 +55,7 @@ class DriverController extends Controller
         ]);
     }
 
-    public function login(Request $request): JsonResponse
+    public function login(Request $request)
     {
         // Validasi input
         $validateData = $request->validate([
@@ -68,19 +68,13 @@ class DriverController extends Controller
 
         if (!$driver) {
             // Jika driver tidak ditemukan
-            return response()->json([
-                'status' => 3,
-                'message' =>  'Email atau password salah',
-            ]);
+            return new DriverResource(404, 'Email atau password salah');
         }
 
         // Cek apakah password salah
         if (!Hash::check($validateData['driver_password'], $driver->password)) {
             // Jika password salah
-            return response()->json([
-                'status' => 4,
-                'message' =>  'Password Anda Salah',
-            ]);
+            return new DriverResource(400, 'Password Anda Salah');
         }
 
         // Jika driver sudah diverifikasi, perbarui fcm_token jika disediakan
@@ -93,14 +87,14 @@ class DriverController extends Controller
 
         return response()->json([
             'status' => 1,
-            'token' => $driver->id,
+            'id_driver' => $driver->id,
             'tokens' => $token,
             'message' => "Login berhasil",
             'is_status' => $driver->is_status
         ]);
     }
 
-    public function register(Request $request): JsonResponse
+    public function register(Request $request)
     {
         $validatedData = $request->validate([
             'type_vehicle' => 'required|string',
@@ -118,10 +112,7 @@ class DriverController extends Controller
         // Cek jika email sudah terdaftar
         $existingUserByEmail = Driver::where('email', $validatedData['email_rider'])->first();
         if ($existingUserByEmail) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Email sudah digunakan driver lain.'
-            ], 400);
+            return new DriverResource(404, 'Email sudah terdaftar driver lain.');
         }
 
         // Cek jika nomor WhatsApp sudah terdaftar
@@ -132,10 +123,7 @@ class DriverController extends Controller
             } else {
                 $message = 'Nomor HP telah ada silahkan Login';
             }
-            return response()->json([
-                'status' => 401,
-                'message' => $message,
-            ], 401);
+            return new DriverResource(401, $message);
         }
 
         $driver = Driver::create([
@@ -156,7 +144,7 @@ class DriverController extends Controller
 
         return response()->json([
             'status' => 200,
-            'token' => $driver->id,
+            'id_driver' => $driver->id,
             'tokens' => $token,
             'message' => 'Data berhasil dibuat.',
         ]);
@@ -206,12 +194,12 @@ class DriverController extends Controller
     public function updateFCMToken(Request $request)
     {
         $validateData = $request->validate([
-            'token' => 'required',
+            'id_driver' => 'required',
             'fcm_token' => 'required',
         ]);
 
         try {
-            $idDriver = $validateData['token'];
+            $idDriver = $validateData['id_driver'];
             $fcmToken = $validateData['fcm_token'];
 
             $driver = Driver::find($idDriver);
