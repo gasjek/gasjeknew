@@ -15,7 +15,7 @@ class MitraDriverController extends Controller
 {
     public function driverPage()
     {
-        return view('auth.mitra.driverRegister');
+        return view('mitra.driverRegister');
     }
 
     public function registerDriver(PostDriverRequest $request)

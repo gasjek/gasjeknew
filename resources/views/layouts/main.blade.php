@@ -47,11 +47,11 @@
                 <div class="cursor-pointer lg:hidden" id="nav_toggle">
                     <i id="nav_icon" class="ri-menu-3-line text-2xl text-secondary"></i>
                 </div>
-                <ul class="fixed w-full h-0 p-0 bg-white lg:bg-white overflow-hidden border-r top-[60px] left-0 right-0 flex flex-col lg:gap-8 gap-4 lg:relative lg:flex-row lg:p-0 lg:top-0 border-none lg:h-full transition-all duration-300"
+                <ul class="fixed w-full h-0 p-0 bg-white lg:bg-white overflow-hidden border-r top-[60px] left-0 right-0 flex flex-col lg:gap-8 gap-4 lg:relative lg:flex-row lg:p-0 lg:top-0 border-none lg:h-full transition-all duration-300 font-semibold"
                     id="nav_menu">
                     <li><a href="{{ route('home') }}" class="menu-item">Home</a></li>
                     <li><a href="#services" class="menu-item">Layanan</a></li>
-                    <li><a href="{{ route('mitra.driverPage') }}" class="menu-item">Mitra</a></li>
+                    <li><a href="{{ route('mitra') }}" class="menu-item">Mitra</a></li>
                     <li><a href="#contact" class="menu-item">Kontak</a></li>
                     <li><a href="#en" class="menu-item">EN</a></li>
                 </ul>

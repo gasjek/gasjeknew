@@ -83,5 +83,5 @@ p > a {
     @apply w-[112px];
 }
 .container {
-    @apply w-[80%] m-auto p-0;
+    @apply m-auto p-0;
 }
