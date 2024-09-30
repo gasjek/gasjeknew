@@ -3,7 +3,6 @@ export default {
   content: [
     "./resources/**/*.blade.php",
       "./resources/**/*.js",
-      "./resources/**/*.vue",
       "./node_modules/flowbite/**/*.js"
   ],
   theme: {
@@ -16,6 +15,8 @@ export default {
     container: {
       padding: "25px",
       center: true,
+      width: "80%",  
+      margin: "auto",
     },
     colors: {
       primary: {

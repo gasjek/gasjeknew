@@ -203,7 +203,6 @@ class DriverController extends Controller
             return new DriverResource(500, 'Terjadi Kesalahan Server');
         }
     }
-
     public function updateFCMToken(Request $request)
     {
         $validateData = $request->validate([

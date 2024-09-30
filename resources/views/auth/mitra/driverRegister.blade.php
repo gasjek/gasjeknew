@@ -1,9 +1,8 @@
 @extends('layouts.main')
 @section('content')
     <main class="min-h-screen">
-        <div class="text-center items-center justify-center mt-6">
-            <h1
-                class="mb-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white">
+        <div class="text-center items-center justify-center m-6">
+            <h1 class="mb-4 text-2xl leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white">
                 Daftar untuk Bergabung sebagai <span
                     class="underline underline-offset-3 decoration-8 decoration-primary dark:decoration-secondary">Mitra
                     Driver GASJek</span></h1>
