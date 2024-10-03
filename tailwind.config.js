@@ -16,8 +16,6 @@ export default {
     container: {
       padding: "25px",
       center: true,
-      width: "80%",  
-      margin: "auto",
     },
     colors: {
       primary: {

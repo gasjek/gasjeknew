@@ -1,7 +1,7 @@
-<section id="section-2" class=" bg-white pt-10 md:pt-20 pb-5 md:pb-10">
+<section id="section-2" class="pt-10 md:pt-20 pb-5 md:pb-10">
     <div class="container flex text-center justify-center">
         <div class="w-full lg:w-full ml-0">
-            <h2 class="text-5xl text-primary">Bertumbuh besar bersama Gasjek</h2>
+            <h2 class="text-2xl sm:text-5xl text-primary">Bertumbuh besar bersama Gasjek</h2>
         </div>
     </div>
 </section>
@@ -15,9 +15,7 @@
                 <p>Di belakang startup dengan pertumbuhan paling tinggi di Asia Tenggara, terdapat talenta yang
                     memiliki ide-ide cemerlang</p>
             </div>
-            <a target="_self"
-                class="py-3 text-lg px-5 text-white bg-primary hover:bg-secondary focus:outline-none rounded-full text-center me-2 mb-2 dark:bg-primary dark:hover:bg-secondary transition duration-300 ease-in-out leading-6 w-fit"
-                href="/mitra/career"><span>Selengkapnya</span>
+            <a target="_self" class="btn-rounded" href="/mitra/career"><span>Selengkapnya</span>
             </a>
         </div>
         <div class="flex flex-col">
@@ -28,9 +26,7 @@
                 <p>Kami adalah rumah bagi lebih dari 2 juta mitra driver di Asia Tenggara, yang mendapat jaminan
                     finansial dan fasilitas kesehatan.</p>
             </div>
-            <a target="_self"
-                class="py-3 text-lg px-5 text-white bg-primary hover:bg-secondary focus:outline-none rounded-full text-center me-2 mb-2 dark:bg-primary dark:hover:bg-secondary transition duration-300 ease-in-out leading-6 w-fit"
-                href="{{ route('mitra.driverPage') }}"><span>Selengkapnya</span></a>
+            <a target="_self" class="btn-rounded" href="{{ route('mitra.driverPage') }}"><span>Selengkapnya</span></a>
         </div>
         <div class="flex flex-col">
             <img alt="tiny card" src="https://cdn-site.gojek.com/uploads/merchant_partner_57c8629626.svg"
@@ -40,8 +36,6 @@
                 <p>Kami membantu 500.000+ Mitra Usaha melipatgandakan penjualan, meluaskan jangkauan, dan berkembang
                     dengan teknologi baru.</p>
             </div>
-            <a target="_self"
-                class="py-3 text-lg px-5 text-white bg-primary hover:bg-secondary focus:outline-none rounded-full text-center me-2 mb-2 dark:bg-primary dark:hover:bg-secondary transition duration-300 ease-in-out leading-6 w-fit"
-                href="/mitra/marchant"><span>Selengkapnya</span></a>
+            <a target="_self" class="btn-rounded" href="/mitra/marchant"><span>Selengkapnya</span></a>
         </div>
 </section>

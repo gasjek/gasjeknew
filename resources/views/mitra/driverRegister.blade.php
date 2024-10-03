@@ -22,9 +22,9 @@
         }
     </style>
 @endpush
-@extends('layouts.main')
+@extends('layouts.guest')
 @section('content')
-    <main class="min-h-screen">
+    <section class="min-h-screen">
         <div class="text-center items-center justify-center m-6">
             <h1 class="mb-4 text-2xl leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white">
                 Daftar untuk Bergabung sebagai <span
@@ -150,7 +150,7 @@
                 </form>
             </div>
         </div>
-    </main>
+    </section>
 @endsection
 
 @push('custom-js')

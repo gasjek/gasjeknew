@@ -1,4 +1,4 @@
-@extends('layouts.main')
+@extends('layouts.guest')
 @section('content')
     <!-- Home Section -->
     <main class="mx-w-[1920px] mx-auto bg-white overflow-hidden" id="home">

@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import "swiper/css";
 body {
     @apply font-secondary text-white;
 }
@@ -38,16 +39,9 @@ h3 {
     @apply text-[25px];
 }
 
-.btn {
-    @apply h-[50px] px-[25px] transition-all duration-300 text-white rounded-[50px] flex items-center gap-2 mt-3;
+.btn-rounded {
+    @apply py-3 text-lg px-5 text-white bg-primary hover:bg-secondary focus:outline-none rounded-full text-center me-2 mb-2 dark:bg-primary dark:hover:bg-secondary transition duration-300 ease-in-out leading-6 w-fit font-semibold;
 }
-
-/* .btn-primary {
-  @apply bg-primary hover:bg-primary-hover;
-}
-.btn-secondary {
-  @apply bg-secondary hover:bg-secondary-hover;
-} */
 
 .nav-is-open {
     @apply h-max p-6;
@@ -84,4 +78,9 @@ p > a {
 }
 .container {
     @apply m-auto p-0;
+}
+@media (max-width: 768px) {
+    .container {
+        @apply w-[90%];
+    }
 }

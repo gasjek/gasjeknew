@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MitraController;
 use App\Http\Controllers\MitraDriverController;
+use App\Http\Controllers\ServiceController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -17,4 +18,5 @@ Route::middleware('guest')->group(function () {
         Route::post('/daftar-driver', [MitraDriverController::class, 'registerDriver'])->name('mitra.driverRegister');
         Route::put('/update-status', [MitraDriverController::class, 'updateStatus'])->name('driver.updateStatus');
     });
+    Route::get('/layanan', [ServiceController::class, 'index'])->name('layanan');
 });
